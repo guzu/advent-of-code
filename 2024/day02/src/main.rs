@@ -9,6 +9,38 @@ enum Dir {
     Increase
 }
 
+fn is_safe(report: &Vec<u32>) -> bool {
+    let mut safe : bool = true;
+    let dir = if report[0] > report[1] { Dir::Decrease } else { Dir::Increase };
+
+    let mut i : usize = 0;
+    let mut j : usize = 1;
+
+    while j < report.len() {
+        let l1 = report[i];
+        let l2 = report[j];
+
+        match dir {
+            Dir::Decrease => {
+                if l2 > l1 || l1-l2 < 1 || l1-l2 > 3 {
+                    safe = false;
+                }
+            }
+            Dir::Increase => {
+                if l1 > l2 || l2-l1 < 1 || l2-l1 > 3 {
+                        safe = false;
+                }
+            }
+        }
+
+        i += 1;
+        j += 1;
+    }
+
+    safe
+}
+
+
 fn main() {
     let lines = read_lines("input.txt").unwrap();
     let mut res = 0u32;
@@ -16,23 +48,19 @@ fn main() {
     for line in lines {
         let l = line.unwrap();
         let report : Vec<u32> = l.split_whitespace().map(|s| s.parse::<u32>().unwrap()).collect();
-        let mut safe : bool = true;
-        let dir = if report[0] > report[1] { Dir::Decrease } else { Dir::Increase };
-
-        for (l1,l2) in report.iter().zip(report.iter().skip(1)) {
-            match dir {
-                Dir::Decrease => {
-                    if l2 > l1 || l1-l2 < 1 || l1-l2 > 3 {
-                        safe = false;
-                    }
-                }
-                Dir::Increase => {
-                    if l1 > l2 || l2-l1 < 1 || l2-l1 > 3 {
-                        safe = false;
-                    }
-                }
+        let mut rem : usize = 0;
+        let mut safe : bool;
+        let mut r = report.clone();
+        loop {
+            safe = is_safe(&r);
+            if safe || rem >= report.len() {
+                break;
             }
+            r = report.clone();
+            r.remove(rem);
+            rem += 1;
         }
+
         res += if safe {1} else {0};
     }
 
