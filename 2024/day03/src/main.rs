@@ -6,19 +6,25 @@ use regex::Regex;
 fn main() {
     let lines = read_lines("input.txt").unwrap();
     let mut res : u64 = 0;
-
-    let re = Regex::new(r"mul\(([0-9]+),([0-9]+)\)").unwrap();
+    let mut enabled = 1;
+    let re = Regex::new(r"do\(\)|don't\(\)|mul\([0-9]+,[0-9]+\)").unwrap();
+    let re_mul = Regex::new(r"mul\(([0-9]+),([0-9]+)\)").unwrap();
 
     for line in lines {
         let l = line.unwrap();
         
-        for m in re.captures_iter(&l) {
-            let (_,[v1,v2]) = m.extract();
-            res += v1.parse::<u64>().unwrap() * v2.parse::<u64>().unwrap();
+        for mat in re.find_iter(&l) {
+            if mat.as_str() == "do()"       { enabled = 1;  }
+            else if mat.as_str() == "don't()" { enabled = 0; }
+            else {
+                let (_,[v1,v2]) = re_mul.captures_iter(mat.as_str()).nth(0).unwrap().extract();
+                res += enabled * v1.parse::<u64>().unwrap() * v2.parse::<u64>().unwrap();
+            }
         }
     }
 
     // part 1 : 183788984
+    // part 2 : 62098619
     println!("result: {}", res);
 }
 
